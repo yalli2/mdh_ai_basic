@@ -1,0 +1,959 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MDHTech AI 실습실</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}</style>
+<style>
+/* Layout: 작업표준서(WI) 형식의 실습 문서. 왼쪽 차시 목차, 오른쪽 작업 화면(입력 | 결과). */
+:root{
+  --bg:#edf0f5; --surface:#ffffff; --surface-2:#f5f7fa; --ink:#121b2b; --muted:#566277;
+  --line:#d3dae4; --line-strong:#aeb9c9;
+  --accent:#1c4fd8; --accent-ink:#ffffff; --accent-soft:#e3ebff;
+  --ok:#0f7a56; --ok-soft:#dff3ea; --warn:#a85a07; --warn-soft:#fbeed8; --bad:#b92f27; --bad-soft:#fbe2df;
+  --font:"IBM Plex Sans KR","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1522; --surface:#151e2e; --surface-2:#1a2539; --ink:#e7edf7; --muted:#9aa7bc;
+    --line:#27344b; --line-strong:#3b4b68;
+    --accent:#7ea2ff; --accent-ink:#0b1424; --accent-soft:#1c2b4d;
+    --ok:#4fd1a0; --ok-soft:#12352a; --warn:#f0b35a; --warn-soft:#3a2a10; --bad:#ff8a80; --bad-soft:#3d1a18;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1522; --surface:#151e2e; --surface-2:#1a2539; --ink:#e7edf7; --muted:#9aa7bc;
+  --line:#27344b; --line-strong:#3b4b68;
+  --accent:#7ea2ff; --accent-ink:#0b1424; --accent-soft:#1c2b4d;
+  --ok:#4fd1a0; --ok-soft:#12352a; --warn:#f0b35a; --warn-soft:#3a2a10; --bad:#ff8a80; --bad-soft:#3d1a18;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.65 var(--font);
+  padding-block:20px 56px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+a{color:var(--accent)}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr);gap:28px;max-width:1520px;margin:0 auto;align-items:start}
+.side{position:sticky;top:calc(16px + env(safe-area-inset-top,0px));display:flex;flex-direction:column;gap:14px;max-height:calc(100dvh - 32px);overflow:auto;min-width:0}
+.brand{display:flex;flex-direction:column;gap:2px;padding:2px 2px 10px;border-bottom:1px solid var(--line)}
+.brand .mark{font:600 12px var(--mono);letter-spacing:.08em;color:var(--accent)}
+.brand strong{font-size:22px;line-height:1.3;font-weight:700}
+.brand small{color:var(--muted);font-size:12.5px}
+#nav{display:flex;flex-direction:column;gap:2px}
+.nav-item{display:grid;grid-template-columns:26px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:var(--r);color:var(--ink);text-decoration:none;border:1px solid transparent}
+.nav-item:hover{background:var(--surface)}
+.nav-item[aria-current="page"]{background:var(--surface);border-color:var(--line-strong);box-shadow:inset 3px 0 0 var(--accent)}
+.nav-item .no{font:500 12px var(--mono);color:var(--muted)}
+.nav-item .t{font-size:14px;font-weight:500;word-break:keep-all}
+.nav-item .m{font-size:12px;color:var(--muted);white-space:nowrap}
+.nav-item.done .m::before{content:"✓ ";color:var(--ok);font-weight:700}
+.nav-break{margin:6px 10px;padding:4px 0;border-top:1px dashed var(--line-strong);border-bottom:1px dashed var(--line-strong);font-size:12px;color:var(--muted);text-align:center}
+.prog{display:flex;flex-direction:column;gap:6px;font-size:12.5px;color:var(--muted)}
+.prog .bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden}
+.prog .bar i{display:block;height:100%;background:var(--accent)}
+.conn{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:8px 10px;border:1px solid var(--line);border-radius:var(--r);background:var(--surface)}
+.conn .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex:none}
+.conn.ready .dot{background:var(--ok)} .conn.none .dot{background:var(--warn)}
+.fine{margin:0;font-size:12px;color:var(--muted);line-height:1.55}
+.main{min-width:0;display:flex;flex-direction:column;gap:18px;outline:none}
+.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.stack>*{min-width:0}
+.dochead{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.dochead .meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--surface-2);border-bottom:1px solid var(--line)}
+.dochead .meta div{padding:8px 14px;border-right:1px solid var(--line)}
+.dochead .meta div:last-child{border-right:0}
+.dochead .meta small{display:block;font-size:11.5px;color:var(--muted);letter-spacing:.04em}
+.dochead .meta b{font:500 14px/1.4 var(--mono)}
+.dochead .meta b.k{font-family:var(--font);font-weight:600}
+.dochead .body{padding:18px 20px 20px}
+h1{font-size:28px;line-height:1.3;margin:0 0 10px;font-weight:700;text-wrap:balance;word-break:keep-all}
+.lab{display:inline-block;font-size:12px;font-weight:600;color:var(--accent);margin-bottom:2px;letter-spacing:.04em}
+.goal{margin:0;max-width:68ch;word-break:keep-all}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;min-width:0}
+.panel h2,.panel h3{margin:0 0 10px}
+.step-h{display:flex;align-items:center;gap:10px;margin:0 0 10px;font-size:15.5px;font-weight:600}
+.step-h .n{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font:600 12px var(--mono);flex:none}
+.sub{margin:0 0 10px;color:var(--muted);font-size:13.5px;word-break:keep-all}
+.tag{display:inline-block;font-size:11.5px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--warn-soft);color:var(--warn);margin-left:8px;vertical-align:middle}
+textarea,select,input[type=text]{width:100%;font:inherit;font-size:14.5px;line-height:1.6;color:var(--ink);background:var(--surface-2);border:1px solid var(--line-strong);border-radius:var(--r);padding:10px 12px}
+textarea{min-height:84px;resize:vertical}
+textarea[readonly]{background:var(--surface);color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn{font:600 14px var(--font);padding:9px 16px;border-radius:var(--r);border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.sm{padding:4px 10px;font-size:12.5px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{font:500 13.5px var(--font);padding:7px 12px;border-radius:var(--r);border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:600}
+.chip{font:500 12.5px var(--font);padding:5px 11px;border-radius:999px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer;text-align:left}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.hintlabel{font-size:12.5px;color:var(--muted);margin:12px 0 6px}
+.labgrid{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+.labgrid>div{display:flex;flex-direction:column;gap:16px;min-width:0}
+@media (min-width:1440px){.labgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.out{border:1px solid var(--line-strong);border-radius:var(--r);background:var(--surface);min-width:0}
+.out-head{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid var(--line);background:var(--surface-2);flex-wrap:wrap;border-radius:var(--r) var(--r) 0 0}
+.out-label{font-weight:600;font-size:13.5px}
+.out-status{font-size:12.5px;color:var(--muted);margin-right:auto}
+.out-body{padding:14px 16px;min-height:96px}
+.out-body.empty{color:var(--muted)}
+.think{color:var(--muted);margin:0}
+.md{word-break:keep-all;overflow-wrap:break-word}
+.md>:first-child{margin-top:0}.md>:last-child{margin-bottom:0}
+.md p{margin:.6em 0}
+.md ul,.md ol{margin:.5em 0;padding-left:1.4em}.md li{margin:.2em 0}
+.md h3,.md h4{font-size:15.5px;margin:1.1em 0 .4em;font-weight:700}
+.md blockquote{margin:.7em 0;padding:2px 12px;border-left:3px solid var(--line-strong);color:var(--muted)}
+.md hr{border:0;border-top:1px solid var(--line);margin:1em 0}
+.md code{font:13px var(--mono);background:var(--surface-2);padding:1px 5px;border-radius:4px}
+.tablewrap{overflow-x:auto;margin:.7em 0}
+.md table{border-collapse:collapse;font-size:13.5px;min-width:100%}
+.md th,.md td{border:1px solid var(--line);padding:6px 9px;text-align:left;vertical-align:top}
+.md th{background:var(--surface-2);font-weight:600;white-space:nowrap}
+.code{position:relative;margin:.7em 0}
+.code pre{margin:0;padding:12px 14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto;font:13px/1.55 var(--mono)}
+.code pre code{background:none;padding:0;font:inherit}
+.code .copy{position:absolute;top:6px;right:6px}
+.checks{display:grid;gap:9px;margin:0;padding:0;list-style:none}
+.checks label{display:flex;gap:10px;align-items:flex-start;cursor:pointer;word-break:keep-all}
+.checks input{margin-top:5px;width:16px;height:16px;accent-color:var(--accent);flex:none}
+.badge{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--ok-soft);color:var(--ok);margin-left:8px}
+.callout{padding:12px 14px;border-radius:var(--r);background:var(--accent-soft);color:var(--ink);border:1px solid var(--line);font-size:14px;word-break:keep-all}
+.callout.warn{background:var(--warn-soft)}
+.formula{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.formula div{padding:12px 14px;border-right:1px solid var(--line);word-break:keep-all}
+.formula div:last-child{border-right:0}
+.formula b{display:block;font-size:15px;margin-bottom:2px}
+.formula span{font-size:13px;color:var(--muted)}
+.cols{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.cols.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.fields{display:grid;gap:12px;grid-template-columns:repeat(2,minmax(0,1fr))}
+.fields label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
+.fields small{font-weight:400;color:var(--muted);margin-left:6px}
+.ab{display:grid;gap:16px;grid-template-columns:minmax(0,1fr)}
+@media (min-width:1200px){.ab{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.qrow{padding:12px 0;border-top:1px solid var(--line)}
+.qrow:first-child{border-top:0;padding-top:0}
+.qt{margin:0 0 8px;font-weight:500;word-break:keep-all}
+.cbar{display:flex;gap:8px;flex-wrap:wrap}
+.cbtn{font:500 13px var(--font);padding:6px 12px;border-radius:var(--r);border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer}
+.cbtn::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;background:var(--dotc,var(--muted))}
+.cbtn.g{--dotc:var(--ok)}.cbtn.y{--dotc:var(--warn)}.cbtn.r{--dotc:var(--bad)}
+.cbtn:disabled{cursor:default;opacity:.55}
+.cbtn.right{background:var(--ok-soft);border-color:var(--ok);opacity:1}
+.cbtn.wrong{background:var(--bad-soft);border-color:var(--bad);opacity:1}
+.cbtn.answer{opacity:1;outline:2px solid var(--ok);outline-offset:1px}
+.fb{margin:8px 0 0;font-size:13.5px;word-break:keep-all}
+.fb.ok{color:var(--ok)}.fb.bad{color:var(--bad)}
+.quiz-sum{margin:12px 0 0;font-weight:600}
+.maskbox{padding:14px 16px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);line-height:2.1;word-break:keep-all}
+.tok{font:inherit;color:inherit;border:1px dashed var(--line-strong);background:var(--warn-soft);border-radius:4px;padding:0 5px;margin:0 1px;cursor:pointer}
+.tok.masked{background:var(--ink);color:var(--surface);border-style:solid;border-color:var(--ink)}
+.dtable{border-collapse:collapse;font-size:13.5px;width:100%}
+.dtable th,.dtable td{border:1px solid var(--line);padding:6px 10px;text-align:left}
+.dtable th{background:var(--surface-2)}
+.dtable td.num,.dtable th.num{text-align:right;font-variant-numeric:tabular-nums}
+.raw{white-space:pre-wrap;font:13px/1.7 var(--mono);margin:0;padding:12px 14px;background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);overflow-x:auto}
+.saved{display:flex;flex-direction:column;gap:10px}
+.saved article{border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;background:var(--surface-2)}
+.saved small{color:var(--muted)}
+.saved pre{white-space:pre-wrap;margin:6px 0 8px;font:13px/1.6 var(--font);max-height:7.5em;overflow:auto}
+.principles{margin:0;padding-left:1.3em}.principles li{margin:.35em 0;word-break:keep-all}
+.next{display:flex;justify-content:flex-end}
+.next a{font-weight:600;text-decoration:none;padding:10px 16px;border:1px solid var(--accent);border-radius:var(--r)}
+@keyframes pulse{0%,100%{opacity:.45}50%{opacity:1}}
+.think{animation:pulse 1.4s ease-in-out infinite}
+@media (prefers-reduced-motion:reduce){.think{animation:none}}
+@media (max-width:860px){
+  .app{grid-template-columns:minmax(0,1fr);gap:14px}
+  .side{position:static;max-height:none;overflow:visible}
+  #nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}
+  .nav-item{grid-template-columns:auto auto;white-space:nowrap;background:var(--surface);border-color:var(--line)}
+  .nav-item .m{display:none}
+  .nav-break,.fine{display:none}
+  h1{font-size:23px}
+  .formula{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .formula div{border-bottom:1px solid var(--line)}
+  .cols,.cols.three,.fields{grid-template-columns:minmax(0,1fr)}
+  .dochead .meta{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dochead .meta div:nth-child(3){grid-column:1/-1;border-top:1px solid var(--line);border-right:0}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="실습 목차">
+    <div class="brand"><span class="mark">MDHTech</span><strong>AI 실습실</strong><small>AI 기초실무 · 2026.11.03</small></div>
+    <nav id="nav" aria-label="차시"></nav>
+    <div class="prog" id="prog"></div>
+    <div class="conn" id="conn" role="status"><i class="dot"></i><span>Claude 연결 확인 중</span></div>
+    <p class="fine">연습 자료는 모두 가상 예시입니다. 실제 사내 기밀·개인정보는 입력하지 마세요.</p>
+  </aside>
+  <main class="main" id="main" tabindex="-1"></main>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- 공통 도구 ---------- */
+function h(tag, attrs, ...kids){
+  const el=document.createElement(tag);
+  if(attrs) for(const [k,v] of Object.entries(attrs)){
+    if(v==null||v===false) continue;
+    if(k==='class') el.className=v;
+    else if(k==='html') el.innerHTML=v;
+    else if(k.startsWith('on')) el.addEventListener(k.slice(2),v);
+    else if(k==='hidden'||k==='value'||k==='checked'||k==='disabled') el[k]=v;
+    else el.setAttribute(k,v===true?'':v);
+  }
+  for(const kid of kids.flat()){
+    if(kid==null||kid===false) continue;
+    el.append(kid.nodeType?kid:document.createTextNode(kid));
+  }
+  return el;
+}
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const LS={
+  get(k,d){try{const v=localStorage.getItem('mdh-ai:'+k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem('mdh-ai:'+k,JSON.stringify(v))}catch(e){}}
+};
+async function copyText(text,btn){
+  const label=btn?btn.textContent:'';
+  let ok=false;
+  try{await navigator.clipboard.writeText(text);ok=true}catch(e){
+    try{
+      const ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');
+      ta.style.cssText='position:fixed;left:-9999px;top:0';document.body.append(ta);ta.select();
+      ok=document.execCommand('copy');ta.remove();
+    }catch(e2){}
+  }
+  if(btn){btn.textContent=ok?'복사됨':'직접 선택해 복사하세요';setTimeout(()=>{btn.textContent=label},1600)}
+  return ok;
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('[data-copy]');
+  if(!b) return;
+  const pre=b.parentElement.querySelector('pre');
+  if(pre) copyText(pre.textContent,b);
+});
+
+/* ---------- 마크다운 (Claude 답변 표시용, HTML은 모두 이스케이프) ---------- */
+function inl(s){
+  s=esc(s);
+  s=s.replace(/&lt;br\s*\/?&gt;/gi,'<br>');
+  s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/(^|[^*\w])\*([^*\s][^*]*?)\*(?!\*)/g,'$1<em>$2</em>');
+  return s;
+}
+function cells(line){let t=line.trim();if(t.startsWith('|'))t=t.slice(1);if(t.endsWith('|'))t=t.slice(0,-1);return t.split('|').map(c=>c.trim())}
+function codeHtml(t){return '<div class="code"><button type="button" class="btn sm copy" data-copy>복사</button><pre><code>'+esc(t)+'</code></pre></div>'}
+function listHtml(items,ordered,start){
+  const tag=ordered?'ol':'ul';
+  let html='<'+tag+(ordered&&start>1?' start="'+start+'"':'')+'>',open=false;
+  items.forEach((it,idx)=>{
+    const d=idx===0?0:it.d;
+    if(d===0){
+      if(open){html+='</ul></li>';open=false}else if(idx>0){html+='</li>'}
+      html+='<li>'+inl(it.t);
+    }else{
+      if(!open){html+='<ul>';open=true}
+      html+='<li>'+inl(it.t)+'</li>';
+    }
+  });
+  if(open)html+='</ul></li>';else if(items.length)html+='</li>';
+  return html+'</'+tag+'>';
+}
+function md(src){
+  const L=String(src).replace(/\r/g,'').split('\n');const out=[];let i=0;
+  const isSep=l=>/^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/.test(l);
+  const rowRe=/^\s*\|.*\|\s*$/;
+  const listRe=/^\s*([-*•]|\d+[.)])\s+/;
+  const special=l=>/^```/.test(l)||/^#{1,4}\s/.test(l)||listRe.test(l)||/^\s*>/.test(l)||rowRe.test(l)||/^\s*(---+|\*\*\*+)\s*$/.test(l);
+  while(i<L.length){
+    const l=L[i];
+    if(!l.trim()){i++;continue}
+    if(/^```/.test(l)){
+      const buf=[];i++;
+      while(i<L.length&&!/^```/.test(L[i])){buf.push(L[i]);i++}
+      i++;out.push(codeHtml(buf.join('\n')));continue;
+    }
+    if(rowRe.test(l)&&i+1<L.length&&isSep(L[i+1])){
+      const head=cells(l);i+=2;const rows=[];
+      while(i<L.length&&rowRe.test(L[i])){rows.push(cells(L[i]));i++}
+      out.push('<div class="tablewrap"><table><thead><tr>'+head.map(c=>'<th>'+inl(c)+'</th>').join('')+'</tr></thead><tbody>'+
+        rows.map(r=>'<tr>'+r.map(c=>'<td>'+inl(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>');
+      continue;
+    }
+    let m=l.match(/^(#{1,4})\s+(.*)$/);
+    if(m){out.push((m[1].length<=2?'<h3>':'<h4>')+inl(m[2])+(m[1].length<=2?'</h3>':'</h4>'));i++;continue}
+    if(/^\s*(---+|\*\*\*+)\s*$/.test(l)){out.push('<hr>');i++;continue}
+    if(/^\s*>/.test(l)){
+      const buf=[];
+      while(i<L.length&&/^\s*>/.test(L[i])){buf.push(L[i].replace(/^\s*>\s?/,''));i++}
+      out.push('<blockquote>'+buf.map(inl).join('<br>')+'</blockquote>');continue;
+    }
+    if(listRe.test(l)){
+      const ordered=/^\s*\d+[.)]\s+/.test(l);
+      const first=ordered?parseInt(l.match(/^\s*(\d+)/)[1],10):1;
+      const items=[];
+      while(i<L.length&&listRe.test(L[i])){
+        const mm=L[i].match(/^(\s*)(?:[-*•]|\d+[.)])\s+(.*)$/);
+        items.push({d:mm[1].length>=2?1:0,t:mm[2]});i++;
+      }
+      out.push(listHtml(items,ordered,first));continue;
+    }
+    const buf=[l];i++;
+    while(i<L.length&&L[i].trim()&&!special(L[i])){buf.push(L[i]);i++}
+    out.push('<p>'+buf.map(inl).join('<br>')+'</p>');
+  }
+  return out.join('');
+}
+
+/* ---------- 진행 상태 ---------- */
+let done=new Set(LS.get('done',[]));
+let saved=LS.get('saved',[]);
+function markDone(id){if(!done.has(id)){done.add(id);LS.set('done',[...done]);renderNav()}}
+
+/* ---------- Claude 연결 (sample 기능) ---------- */
+let SAMPLE=null,CONN='checking',connRes;
+const connP=new Promise(r=>{connRes=r});
+function updateConn(){
+  const el=document.getElementById('conn');
+  el.className='conn '+(CONN==='ready'?'ready':CONN==='none'?'none':'');
+  el.lastElementChild.textContent=CONN==='ready'?'Claude 연결됨':CONN==='none'?'Claude 연결 안 됨 · 복사 모드':'Claude 연결 확인 중';
+}
+function setConn(s){CONN=s;updateConn();if(s!=='checking')connRes()}
+(async()=>{
+  try{
+    const s=window.claude&&await window.claude.use('sample');
+    if(s){SAMPLE=s;setConn('ready')}else setConn('none');
+  }catch(e){setConn('none')}
+})();
+const BLOCK=['not_granted','sampling_disabled','not_declared','capability_disabled','capability_removed'];
+function errCopy(code){
+  switch(code){
+    case 'cancelled':return '중지했습니다';
+    case 'not_granted':return 'Claude 사용이 허용되지 않았습니다';
+    case 'sampling_disabled':return '이 계정에서는 Claude를 쓸 수 없습니다';
+    case 'rate_limited':return '요청이 많거나 사용 한도에 도달했습니다. 잠시 뒤 다시 눌러 주세요';
+    case 'session_expired':return '다시 로그인이 필요합니다';
+    case 'refused':return 'Claude가 이 요청에는 답하지 않았습니다. 표현을 바꿔 보세요';
+    case 'empty_completion':return '답변이 비어 있습니다. 요청을 조금 바꿔 보세요';
+    case 'prompt_too_large':return '입력이 너무 깁니다. 자료를 줄여 주세요';
+    default:return '일시적인 오류입니다. 다시 눌러 주세요';
+  }
+}
+const fallbackHtml='<p><b>이 화면에서는 Claude 실행이 연결되지 않았습니다.</b></p>'+
+  '<p>Claude에 로그인한 상태로 이 링크를 열었는지 확인해 주세요. 지금은 <b>프롬프트 복사</b>를 누른 뒤 '+
+  '<a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>에 붙여넣어 같은 실습을 할 수 있습니다.</p>';
+
+function outputPanel(label,{tier='quick'}={}){
+  let ctl=null,timer=null,last='';
+  const status=h('span',{class:'out-status',role:'status'},'아직 실행 전');
+  const stopBtn=h('button',{class:'btn sm',type:'button',hidden:true,onclick:()=>{if(ctl)ctl.abort()}},'중지');
+  const copyBtn=h('button',{class:'btn sm',type:'button',hidden:true,onclick:e=>copyText(last,e.currentTarget)},'결과 복사');
+  const body=h('div',{class:'out-body md empty'},'실행하면 Claude의 답변이 여기에 표시됩니다.');
+  const root=h('section',{class:'out','aria-label':label},
+    h('div',{class:'out-head'},h('span',{class:'out-label'},label),status,stopBtn,copyBtn),body);
+  async function run(input,tierOv){
+    if(ctl) return false;
+    if(CONN==='checking'){status.textContent='Claude 연결 확인 중…';await connP}
+    if(!SAMPLE){body.className='out-body md';body.innerHTML=fallbackHtml;status.textContent='연결 안 됨';return false}
+    const my=new AbortController();ctl=my;
+    const t0=Date.now();last='';let started=false,ok=false;
+    body.className='out-body md';body.innerHTML='<p class="think">Claude가 생각하는 중…</p>';
+    stopBtn.hidden=false;copyBtn.hidden=true;
+    const sec=()=>Math.round((Date.now()-t0)/1000);
+    const tick=()=>{if(!started)status.textContent='생각하는 중… '+sec()+'초'};
+    tick();timer=setInterval(tick,1000);
+    try{
+      const r=await SAMPLE(input,{modelTier:tierOv||tier,signal:my.signal,cache:false,
+        onText:({text})=>{started=true;last=text;body.innerHTML=md(text);status.textContent='작성 중… '+sec()+'초'}});
+      last=r.text;body.innerHTML=md(last);
+      status.textContent='완료 · '+sec()+'초'+(r.truncated?' · 길이 제한으로 일부가 잘렸습니다':'');
+      ok=true;
+    }catch(e){
+      const code=e&&e.code;
+      if(e&&e.text){last=e.text;body.innerHTML=md(last)}
+      else{body.className='out-body md empty';body.textContent=code==='cancelled'?'중지했습니다.':'답변을 받지 못했습니다.'}
+      status.textContent=errCopy(code);
+      if(BLOCK.includes(code)){SAMPLE=null;setConn('none');body.className='out-body md';body.innerHTML=fallbackHtml}
+    }finally{
+      clearInterval(timer);ctl=null;stopBtn.hidden=true;copyBtn.hidden=!last;
+    }
+    return ok;
+  }
+  return {root,run,text:()=>last,busy:()=>!!ctl};
+}
+const PRE='당신은 자동차 부품 제조 기업(MDHTech) 직원의 업무를 돕는 AI 어시스턴트입니다. 한국어로 답하고, 표나 목록이 도움이 되면 마크다운을 사용하세요. 아래 자료는 교육용 가상 예시입니다.';
+function compose(prompt,material,raw){
+  let s=raw?'':PRE+'\n\n';
+  s+=prompt.trim();
+  if(material&&material.trim())s+='\n\n[업무 자료]\n'+material.trim();
+  return s;
+}
+function savePrompt(modLabel,name,text,btn){
+  if(!text.trim())return;
+  saved.unshift({id:Date.now(),mod:modLabel,name,text:text.trim()});
+  saved=saved.slice(0,40);LS.set('saved',saved);
+  const l=btn.textContent;btn.textContent='저장됨';setTimeout(()=>{btn.textContent=l},1500);
+}
+
+/* ---------- 선택형 퀴즈 ---------- */
+function choiceQuiz(items,cats,doneMsg){
+  const root=h('div',{class:'quiz'});let answered=0,score=0;
+  const sum=h('p',{class:'quiz-sum',role:'status'},'0 / '+items.length+' 선택');
+  items.forEach((it,i)=>{
+    const fb=h('p',{class:'fb',hidden:true});
+    const row=h('div',{class:'qrow'});
+    const btns=cats.map((c,ci)=>h('button',{type:'button',class:'cbtn '+(c.cls||''),onclick:()=>pick(ci)},c.label));
+    function pick(ci){
+      const ok=ci===it.a;answered++;if(ok)score++;
+      btns.forEach(b=>{b.disabled=true});
+      btns[ci].classList.add(ok?'right':'wrong');
+      if(!ok)btns[it.a].classList.add('answer');
+      fb.hidden=false;fb.className='fb '+(ok?'ok':'bad');
+      fb.textContent=(ok?'맞아요. ':'정답은 「'+cats[it.a].label+'」입니다. ')+it.why;
+      sum.textContent=answered<items.length?answered+' / '+items.length+' 선택 · 맞힌 개수 '+score:
+        '맞힌 개수 '+score+' / '+items.length+(doneMsg?' · '+doneMsg:'');
+      if(answered===items.length&&root.onfinish)root.onfinish();
+    }
+    row.append(h('p',{class:'qt'},(i+1)+'. '+it.t),h('div',{class:'cbar'},btns),fb);
+    root.append(row);
+  });
+  root.append(sum);
+  return root;
+}
+function miniLab({id,prompt,hints=[],tier='quick',raw=true,label='Claude 답변',onDone,rows=4}){
+  const ta=h('textarea',{id,rows,spellcheck:'false'});ta.value=prompt;
+  const out=outputPanel(label,{tier});
+  const run=h('button',{class:'btn primary',type:'button'},'Claude에게 실행');
+  const copy=h('button',{class:'btn',type:'button',onclick:e=>copyText(compose(ta.value,'',true),e.currentTarget)},'프롬프트 복사');
+  run.onclick=async()=>{
+    if(!ta.value.trim())return;
+    run.disabled=true;
+    const ok=await out.run(compose(ta.value,'',raw),tier);
+    run.disabled=false;if(ok&&onDone)onDone();
+  };
+  const chips=hints.length?h('div',null,h('p',{class:'hintlabel'},'프롬프트에 한 줄 더 붙여 보기'),
+    h('div',{class:'row'},hints.map(t=>h('button',{type:'button',class:'chip',onclick:()=>{
+      if(!ta.value.includes(t))ta.value=ta.value.trimEnd()+'\n'+t;ta.focus();
+    }},'+ '+t)))):null;
+  const root=h('div',{class:'stack'},ta,chips,h('div',{class:'row'},run,copy),out.root);
+  return {root,ta,out};
+}
+
+/* ---------- 데이터 (모두 가상 예시) ---------- */
+const DEFECTS=[
+ {raw:'10/27 A라인 스크래치 3개 (주간)',d:'10/27',l:'A',t:'스크래치',q:3,s:'주간'},
+ {raw:'10/27 B라인 이물 5 야간',d:'10/27',l:'B',t:'이물',q:5,s:'야간'},
+ {raw:'10월 27일 A 찍힘 2ea 야간',d:'10/27',l:'A',t:'찍힘',q:2,s:'야간'},
+ {raw:'10/28 A라인 이물 4개 주간',d:'10/28',l:'A',t:'이물',q:4,s:'주간'},
+ {raw:'10/28 B라인 스크래치 1 주간',d:'10/28',l:'B',t:'스크래치',q:1,s:'주간'},
+ {raw:'10/28 B 이물 6개 야간',d:'10/28',l:'B',t:'이물',q:6,s:'야간'},
+ {raw:'10/29 A라인 치수불량 2ea 주간',d:'10/29',l:'A',t:'치수불량',q:2,s:'주간'},
+ {raw:'10/29 B라인 이물 7개 야간',d:'10/29',l:'B',t:'이물',q:7,s:'야간'},
+ {raw:'10/29 A 스크래치 2 야간',d:'10/29',l:'A',t:'스크래치',q:2,s:'야간'},
+ {raw:'10월 30일 B라인 찍힘 3개 주간',d:'10/30',l:'B',t:'찍힘',q:3,s:'주간'},
+ {raw:'10/30 A라인 이물 3개 야간',d:'10/30',l:'A',t:'이물',q:3,s:'야간'},
+ {raw:'10/30 B 치수불량 1ea 주간',d:'10/30',l:'B',t:'치수불량',q:1,s:'주간'},
+ {raw:'10/31 A라인 이물 5개 야간',d:'10/31',l:'A',t:'이물',q:5,s:'야간'},
+ {raw:'10/31 B라인 스크래치 두 개 주간',d:'10/31',l:'B',t:'스크래치',q:2,s:'주간'}
+];
+function tally(key){const m={};DEFECTS.forEach(r=>{m[r[key]]=(m[r[key]]||0)+r.q});return m}
+const TOTAL=DEFECTS.reduce((a,r)=>a+r.q,0);
+const FOREIGN=DEFECTS.filter(r=>r.t==='이물');
+const F_TOTAL=FOREIGN.reduce((a,r)=>a+r.q,0);
+const F_NIGHT=FOREIGN.filter(r=>r.s==='야간').reduce((a,r)=>a+r.q,0);
+const F_A=FOREIGN.filter(r=>r.l==='A').reduce((a,r)=>a+r.q,0);
+const F_B=F_TOTAL-F_A;
+
+const MEMO=`[품질 정례회의 메모 - 10/30 (가상 예시)]
+참석: 김 팀장(품질), 박 과장(생산 1팀), 이 대리(구매), 최 사원(설비)
+- 김 팀장: 지난주 프레스 브래킷 도금 공정 이물 불량률이 0.8%에서 2.3%로 올랐음. 고객사 출하 검사에서는 아직 지적이 없으나 이대로면 다음 주 초 클레임 가능성 있음.
+- 박 과장: 야간조에서 이물이 많이 나옴. 야간 도금조 필터 교체가 10/25 이후 안 된 것 같다고 함. 확인 필요.
+- 최 사원: 필터는 월 1회 교체가 기준인데 10월 교체 기록이 비어 있음. 설비 점검표 다시 확인하겠다고 함.
+- 이 대리: 도금 약품 납품 업체가 10월 중순에 로트를 바꿨다고 함. 성적서는 정상으로 왔지만 이전 로트와 비교는 안 해봤음.
+- 김 팀장: 우선 필터 상태 확인과 약품 로트 비교를 하고, 결과에 따라 전수선별 여부를 결정하기로 함. 선별 인원은 박 과장이 다음 주 수요일(11/4)까지 필요 인원 산정.
+- 다음 회의는 11/6 오전 10시. 그 전에 중간 공유가 필요하면 단톡방에 올리기로 함.
+- 기타: 박 과장이 신규 입사자 교육 일정도 문의했으나 시간 관계상 다음 회의로 미룸.`;
+
+const NOTICE=`[공급사 품질 안내문 (가상 예시)]
+2026년 12월 1일 납품분부터 아래와 같이 변경됩니다.
+1) 모든 납품 로트에 제조일자와 로트번호가 표시된 라벨을 부착해야 합니다. 라벨 규격은 별첨을 참조하세요.
+2) 성적서는 기존 월 1회에서 로트별 제출로 변경됩니다. 출하 당일 오전 중 전자 제출을 원칙으로 합니다.
+3) 도금 두께 측정 포인트가 기존 3포인트에서 5포인트로 늘어납니다.
+4) 신규 규정을 지키지 않으면 해당 로트는 수입검사 강화 대상이 되며, 3회 누적 시 시정조치 요구서가 발행됩니다.
+5) 문의는 공급사 품질팀 담당자에게 11월 20일까지 해주시기 바랍니다.`;
+
+const EN_MAIL=`Subject: Urgent - Corrosion found on bracket lot L1031
+
+Dear Supplier Quality Team,
+
+During our incoming inspection on October 30, our team found rust spots on 12 out of 200 sampled brackets from lot L1031. The affected parts show corrosion near the bend area, which could affect the coating adhesion test in our assembly line.
+
+Please send us an initial response within 24 hours, including containment actions taken for the parts already in transit. We also require a full 8D report by November 10.
+
+Until further notice, please add salt spray test results to every shipment.
+
+Best regards,
+Daniel Kim
+Supplier Quality, Hanbit Motors (가상 회사)`;
+
+const KO_MAIL=`안녕하세요, 한빛모터스 품질팀 김 님.
+L1031 로트 부식 건 접수했습니다. 현재 해당 로트 재고 1,200개를 격리했고, 오늘 중 선별을 시작합니다.
+내일 오전까지 중간 보고를 드리고, 11월 10일까지 8D 보고서를 제출하겠습니다.
+이동 중인 물량은 확인 후 따로 연락드리겠습니다.
+불편을 드려 죄송합니다.`;
+
+const PHENOM=`[현상 (가상 예시)]
+- 공정: 프레스 브래킷 전기도금 → 외관 검사
+- 불량: 이물(도금면 돌기·입자). 최근 1주 불량률 0.8% → 2.3%
+- 최근 1주 이물 불량 ${F_TOTAL}건 중 ${F_NIGHT}건(약 ${Math.round(F_NIGHT/F_TOTAL*100)}%)이 야간조 생산분
+- 라인별 이물: B라인 ${F_B}건, A라인 ${F_A}건
+- 10월 중순 도금 약품 로트 변경 (성적서는 정상, 이전 로트와의 비교는 하지 않음)
+- 도금조 필터 교체 기준은 월 1회, 10월 교체 기록은 비어 있음
+- 야간조 작업 인원은 주간보다 적음 (정확한 인원은 미확인)
+[아직 확인하지 못한 것] 필터의 실제 상태 / 약품 로트별 차이 / 야간 세정 절차 준수 여부`;
+
+const SHEET=`시트 구조 (가상 예시)
+A열: 날짜 (예: 2026-10-29)
+B열: 라인 (A 또는 B)
+C열: 불량유형 (이물, 스크래치, 찍힘, 치수불량)
+D열: 불량수량
+E열: 생산수량
+1행은 제목, 데이터는 2행부터 500행까지`;
+
+/* ---------- 차시 정의 ---------- */
+const MODS=[
+ {id:'m0',no:'00',title:'AI, 어디까지 맡길까',min:15,kind:'intro',
+  goal:'AI가 무엇이고 어떤 일에 쓰면 좋은지 감을 잡습니다. 먼저 내 화면에서 Claude가 작동하는지 확인합니다.'},
+ {id:'m1',no:'01',title:'프롬프트 기본 공식',min:20,kind:'builder',
+  goal:'같은 질문도 쓰는 방식에 따라 답이 크게 달라지는 것을 직접 비교합니다. 역할·상황·요청·형식, 네 가지만 기억하면 됩니다.'},
+ {id:'m2',no:'02',title:'긴 글 요약하기',min:15,kind:'lab',tier:'quick',matLabel:'원문',
+  goal:'회의 메모나 안내문처럼 긴 글을 읽고 핵심, 결정사항, 할 일을 뽑아냅니다.',
+  scenarios:[
+   {name:'회의 메모 정리',matLabel:'회의 메모',material:MEMO,
+    prompt:'아래 회의 메모를 읽고 다음 형식으로 정리해줘.\n1. 세 줄 요약\n2. 결정된 사항\n3. 담당자별 할 일 (기한 포함, 기한이 없으면 \'미정\'으로 표시)\n4. 아직 확인이 필요한 사항'},
+   {name:'고객사 안내문 → 체크리스트',matLabel:'안내문',material:NOTICE,
+    prompt:'아래 안내문을 읽고 우리 회사가 준비해야 할 일을 체크리스트로 정리해줘. 각 항목마다 담당 부서 후보(예: 생산, 품질, 물류)와 준비 기한 후보를 제안하되, 안내문에 없는 내용은 \'제안\'이라고 표시해줘.'}
+  ],
+  hints:['임원 보고용으로 5문장 이내 한 문단으로 다시 써줘.','카카오톡 단톡방에 올릴 짧은 공지 형태로 바꿔줘.','원문에 없는 내용은 절대 추가하지 마.'],
+  check:['숫자(0.8%, 2.3%, 3→5포인트 등)와 날짜가 원문과 같은가?','담당자 이름과 할 일이 제대로 짝지어졌는가?','원문에 없는 내용이 슬쩍 들어가지 않았는가?','\'미정\'이어야 할 기한을 AI가 임의로 정하지 않았는가?']},
+ {id:'m3',no:'03',title:'업무 메일 쓰기',min:20,kind:'lab',tier:'quick',matLabel:'상황 설명',
+  goal:'상황만 알려주면 메일 초안을 받을 수 있습니다. 같은 내용을 톤만 바꿔 여러 번 뽑아 비교해 보세요.',
+  scenarios:[
+   {name:'협력사 납기 지연 문의',material:'상황: 협력사 \'대성정밀\'(가상)에 발주한 브래킷 5,000개(발주번호 PO-2611-014)의 약속 납기가 11월 5일인데, 11월 8일로 늦어진다고 구두로 연락을 받음. 우리 라인 투입은 11월 10일. 3일 지연이 확정인지, 일부 선납이 가능한지, 지연 원인이 무엇인지 확인하고 싶음. 오래된 거래처라 정중하게 쓰되, 11월 10일 라인 투입은 지켜야 한다는 점은 분명히 전달.',
+    prompt:'당신은 구매팀 담당자입니다. 아래 상황을 바탕으로 협력사 담당자에게 보낼 업무 메일을 작성해줘. 조건: 제목 포함, 본문은 300자 내외, 정중하지만 일정은 분명하게, 협력사가 답해야 할 질문은 번호로.'},
+   {name:'고객사 클레임 1차 회신',material:'상황: 고객사 \'한빛모터스\'(가상) 품질팀에서 어제 입고된 도금 브래킷 로트 L1031에서 이물 불량 7개를 발견했다고 연락함(샘플 200개 검사). 우리는 원인 확인 중이며, 격리·선별 조치를 시작했고, 24시간 안에 중간 보고, 3영업일 안에 원인·대책 보고서를 제출할 예정. 원인은 아직 확정되지 않았음.',
+    prompt:'당신은 품질팀 담당자입니다. 고객사 클레임에 대한 1차 회신 메일을 작성해줘. 조건: 사과와 책임 있는 태도, 현재까지 취한 조치, 앞으로의 일정, 원인은 확인 중임을 분명히. 변명이나 원인 추측은 쓰지 마.'},
+   {name:'사내 점검 공지',material:'상황: 11월 12일 오후 2시~4시, 도금 라인 정기 점검으로 1공장 도금 라인 가동이 중단됨. 해당 시간에 투입 예정인 작업은 오전에 먼저 처리해야 함. 문의는 설비팀 최 사원(내선 214, 가상).',
+    prompt:'전 직원이 한눈에 읽을 수 있는 사내 공지문으로 작성해줘. 5줄 이내, 핵심 정보(일시, 장소, 영향, 문의)는 굵게 표시해줘.'}
+  ],
+  hints:['더 정중한 톤으로 써줘.','더 간결하게, 150자 이내로 써줘.','더 단호한 톤으로 써줘.','제목 후보를 3개 제안해줘.','영어 버전도 같이 써줘.'],
+  check:['고유명사, 숫자, 날짜가 상황 설명과 정확히 같은가?','아직 확정되지 않은 내용을 단정하는 문장은 없는가?','우리 회사가 평소 쓰는 말투와 맞는가?','보내기 전에 사람이 끝까지 읽고 수정했는가?']},
+ {id:'m4',no:'04',title:'번역과 다국어 업무',min:15,kind:'lab',tier:'quick',matLabel:'원문',
+  goal:'해외 고객사 메일을 읽고 답하는 일, 업계 용어를 통일하는 일을 AI와 함께 합니다.',
+  scenarios:[
+   {name:'영어 메일 → 한국어',matLabel:'영어 메일',material:EN_MAIL,
+    prompt:'아래 영어 메일을 (1) 자연스러운 한국어로 번역하고, (2) 고객이 요구하는 사항을 번호 목록으로 정리하고, (3) 회신 기한을 따로 표시해줘. 자동차 부품 업계 용어는 한국 현장에서 쓰는 표현으로 옮기고, 처음 한 번은 영어 원어를 괄호로 함께 적어줘.'},
+   {name:'한국어 회신 → 영어',matLabel:'한국어 회신',material:KO_MAIL,
+    prompt:'아래 한국어 회신을 해외 고객사 품질 담당자에게 보내는 비즈니스 영어 메일로 번역해줘. 격식 있되 간결하게, 제목 포함. 번역 뒤에, 의미가 달라질 수 있어 확인이 필요한 표현이 있으면 따로 알려줘.'},
+   {name:'품질 용어 정리',matLabel:'용어 목록',material:'도금\n이물\n찍힘\n스크래치\n치수불량\n전수선별\n격리\n성적서\n수입검사\n시정조치 요구서',
+    prompt:'아래 자동차 부품 품질 용어를 표로 정리해줘. 열은 한국어 | 영어 | 한 줄 설명. 영어는 업계에서 가장 흔히 쓰는 표현 하나를 먼저 쓰고, 다른 표현이 있으면 괄호에 적어줘.'}
+  ],
+  hints:['번역한 영어를 다시 한국어로 옮겨서, 원문과 의미가 달라진 곳이 있는지 표시해줘.','더 짧고 직설적인 영어로 써줘.','일본 고객사에 보낸다고 가정하고 일본어로도 써줘.'],
+  check:['숫자, 날짜, 로트번호가 그대로 유지되었는가?','존댓말과 격식 수준이 상대에게 맞는가?','번역투로 어색한 문장은 없는가?','중요한 메일은 \'역번역\'으로 의미를 한 번 더 확인했는가?']},
+ {id:'m5',no:'05',title:'데이터 정리와 검산',min:20,kind:'lab',tier:'default',matLabel:'불량 기록 메모',
+  goal:'현장에서 제각각 적은 기록을 표로 정리합니다. 그리고 AI가 계산한 합계를 정답과 직접 비교해 봅니다.',
+  scenarios:[
+   {name:'불량 기록 표로 정리',matLabel:'불량 기록 메모 (현장 작성본)',
+    material:'[불량 기록 메모 - 현장 작성본 (가상 예시)]\n'+DEFECTS.map(r=>r.raw).join('\n'),
+    prompt:'아래는 현장에서 적은 불량 기록이다. 다음 순서로 정리해줘.\n1. 날짜 | 라인 | 불량유형 | 수량 | 근무조 열을 가진 표로 정리 (표기가 다른 날짜와 숫자는 통일)\n2. 불량유형별 합계와 비율\n3. 라인별, 근무조별 합계\n4. 눈에 띄는 패턴 한 가지\n마지막에 \'표로 옮기면서 해석이 필요했던 항목\'도 알려줘.'}
+  ],
+  hints:['엑셀에 바로 붙여넣을 수 있게 탭으로 구분한 텍스트도 만들어줘.','각 합계를 한 번 더 검산해서 알려줘.','의심스러운 기록이나 이상치가 있으면 표시해줘.'],
+  check:['AI가 낸 합계를 아래 \'정답 확인\'과 한 칸씩 비교했는가?','\'2ea\', \'두 개\'처럼 표기가 다른 수량을 제대로 읽었는가?','AI가 임의로 고치거나 지운 기록은 없는가?','숫자가 틀린 부분은 AI에게 어디서 다르게 셌는지 되물어 보았는가?'],
+  extra:renderTruth},
+ {id:'m6',no:'06',title:'불량 원인 분석 보조',min:20,kind:'lab',tier:'default',matLabel:'현상',
+  goal:'원인 후보를 넓게 뽑고 확인 방법까지 정리하는 데 AI를 씁니다. 결론은 AI가 아니라 현장 확인이 냅니다.',
+  scenarios:[
+   {name:'4M 원인 후보 표',material:PHENOM,
+    prompt:'아래 현상에 대해 불량 원인 후보를 4M(사람, 설비, 자재, 방법)으로 나누어 표로 정리해줘. 열은 분류 | 원인 후보 | 근거(현상의 어떤 사실과 연결되는지) | 현장에서 확인하는 방법 | 우선순위(상/중/하). 현상에 없는 사실은 \'가정\'이라고 표시해줘.'},
+   {name:'5Why 분석',material:PHENOM,
+    prompt:'\'야간조에 이물 불량이 집중된다\'는 현상에서 시작해 5Why 분석을 해줘. 각 Why마다 \'사실로 확인된 것\'과 \'가설인 것\'을 구분해 표시하고, 가설은 어떻게 확인할지 적어줘. 억지로 5단계를 채우지 말고, 확인이 필요하면 거기서 멈춰줘.'},
+   {name:'8D 보고서 초안',material:PHENOM,
+    prompt:'8D 보고서의 D1~D4(팀 구성, 문제 기술, 임시조치, 근본원인 후보)만 초안으로 써줘. 확인되지 않은 내용은 \'[확인 필요]\'로 표시하고, 담당자와 일정은 비워 둬.'}
+  ],
+  hints:['우선순위 \'상\'인 후보만 남기고 현장 확인 순서를 정해줘.','우리 현장에서 바로 확인할 수 있는 것과 시간이 걸리는 것으로 나눠줘.','현장 작업자에게 물어볼 질문 5개를 만들어줘.'],
+  check:['근거 열이 실제 현상과 연결되는가, 아니면 일반론인가?','확인 방법이 우리 현장에서 실제로 할 수 있는 것인가?','AI가 모르는 우리 공정 정보를 내가 보충했는가?','\'원인\'이 아니라 \'후보\'로 읽고 있는가? 결론은 현장 확인 후 사람이 낸다.']},
+ {id:'m7',no:'07',title:'엑셀 수식 도우미',min:15,kind:'lab',tier:'quick',matLabel:'시트 구조',
+  goal:'수식을 외우지 않고 말로 설명해서 받습니다. 받은 수식은 작은 샘플로 반드시 시험합니다.',
+  scenarios:[
+   {name:'수식 만들기',material:SHEET,
+    prompt:'위 시트 구조를 기준으로 다음 값을 구하는 엑셀 수식을 만들어줘.\n(1) A라인의 이물 불량수량 합계\n(2) 라인별 불량률 = 불량수량 합계 ÷ 생산수량 합계\n(3) 10월 29일 이후 데이터만의 불량수량 합계\n각 수식은 코드 블록으로, 어느 셀에 넣는지와 하는 일을 한 줄씩 설명해줘. 쓰는 함수가 엑셀 2016에서도 되는지 알려줘.'},
+   {name:'수식 설명과 오류 찾기',matLabel:'수식',
+    material:SHEET+'\n\n내가 쓴 수식: =SUMIF(B2:B500,"A",D2:D500)/SUM(E2:E500)\n의도: A라인 불량률을 구하고 싶음. 결과가 너무 작게 나옴.',
+    prompt:'위 수식이 무슨 일을 하는지 쉬운 말로 설명하고, 의도와 다른 곳이 있는지 알려줘. 고친 수식도 코드 블록으로 제시해줘.'},
+   {name:'피벗테이블 사용법',material:SHEET,
+    prompt:'엑셀 초보자 기준으로, 위 시트에서 \'라인 × 불량유형\' 합계 표를 피벗테이블로 만드는 방법을 단계별로 알려줘. 어떤 메뉴를 누르는지 화면 기준으로 구체적으로 써줘.'}
+  ],
+  hints:['엑셀 365가 아니라 2016 버전이라고 가정해줘.','수식에 오류 처리(IFERROR)를 넣어줘.','같은 결과를 내는 다른 방법도 하나 알려줘.'],
+  check:['받은 수식을 복사해 작은 샘플 데이터로 실제로 돌려 보았는가?','열 이름과 범위가 우리 시트와 같은가?','결과를 손계산과 비교해 보았는가?','수식이 하는 일을 내가 한 문장으로 설명할 수 있는가?']},
+ {id:'m8',no:'08',title:'검증과 보안',min:20,kind:'safety',
+  goal:'AI의 답을 믿어도 되는 경우와 안 되는 경우를 구분하고, 입력해도 되는 정보의 기준을 몸에 익힙니다.'},
+ {id:'m9',no:'09',title:'내 업무에 적용하기',min:10,kind:'wrap',
+  goal:'오늘 배운 것을 내 업무 한 가지에 바로 붙여 봅니다. 쓴 프롬프트는 모아서 가져갑니다.'}
+];
+const modLabel=m=>m.no+' '+m.title;
+
+/* ---------- 공통 화면 조각 ---------- */
+function docHead(mod){
+  const cell=(k,v,cls)=>h('div',null,h('small',null,k),h('b',{class:cls||''},v));
+  return h('header',{class:'dochead'},
+    h('div',{class:'meta'},cell('문서번호','AI-WI-'+mod.no),cell('소요시간',mod.min+'분','k'),cell('교육','AI 기초실무 · 11.03','k')),
+    h('div',{class:'body'},h('h1',null,mod.title),h('span',{class:'lab'},'작업 목적'),h('p',{class:'goal'},mod.goal)));
+}
+function stepH(n,t,extra){return h('h2',{class:'step-h'},h('span',{class:'n'},String(n)),t,extra||null)}
+function nextLink(mod){
+  const i=MODS.indexOf(mod);const nx=MODS[i+1];
+  if(!nx)return null;
+  return h('div',{class:'next'},h('a',{href:'#'+nx.id},'다음: '+modLabel(nx)+' →'));
+}
+
+/* ---------- 00 AI, 어디까지 맡길까 ---------- */
+const SORT_ITEMS=[
+ {t:'긴 회의 메모를 세 줄로 요약하기',a:0,why:'AI가 가장 잘하는 일입니다. 다만 숫자와 담당자 이름은 원문과 대조하세요.'},
+ {t:'해외 고객사 영문 메일 초벌 번역',a:0,why:'초벌 번역은 빠르고 정확합니다. 중요한 메일이면 보내기 전에 사람이 한 번 더 읽습니다.'},
+ {t:'엑셀 수식 초안 만들기',a:0,why:'말로 설명하면 수식을 받을 수 있습니다. 작은 샘플로 시험해 본 뒤 씁니다.'},
+ {t:'사내 공지문 초안 쓰기',a:0,why:'정해진 사실만 알려주면 읽기 좋은 초안이 나옵니다.'},
+ {t:'불량 원인 후보 뽑기',a:1,why:'후보를 넓게 펼치는 데는 좋지만, 어느 것이 진짜 원인인지는 현장 확인으로 사람이 정합니다.'},
+ {t:'출하 합격·불합격 최종 판정',a:1,why:'판정의 책임은 사람에게 있습니다. AI는 정리와 참고까지만 합니다.'},
+ {t:'안전 관련 설비 점검 결과 최종 승인',a:1,why:'사고와 직결되는 승인은 반드시 사람이 합니다.'},
+ {t:'고객사 도면의 치수·공차를 그대로 붙여 넣어 분석시키기',a:2,why:'고객사 기밀입니다. 입력하지 않거나, 사내 규정이 허용한 방식만 씁니다.'},
+ {t:'규격 조항 번호와 문구를 정확히 인용시키기',a:2,why:'AI가 그럴듯하게 틀릴 수 있습니다. 번호와 문구는 반드시 원문에서 확인하세요.'}
+];
+function renderIntro(mod){
+  const root=h('div',{class:'stack'});root.append(docHead(mod));
+  root.append(h('section',{class:'cols'},
+    h('div',{class:'panel'},h('h3',null,'AI는 이런 도구입니다'),
+      h('ul',{class:'principles'},
+        h('li',null,'말로 지시하면 글, 표, 수식, 코드를 만들어 주는 도구입니다. 오늘 쓰는 도구는 Claude입니다.'),
+        h('li',null,'빠르고 지치지 않지만, 우리 회사 사정은 모릅니다. 알려 준 만큼만 일합니다.'),
+        h('li',null,'가끔 자신 있게 틀립니다. 숫자, 날짜, 이름은 항상 확인합니다.'),
+        h('li',null,'결과를 쓰는 책임은 사람에게 있습니다. AI는 초안을 빨리 만들어 주는 동료입니다.'))),
+    h('div',{class:'panel'},h('h3',null,'오늘 해 볼 일'),
+      h('ul',{class:'principles'},
+        [['m2','회의 메모, 안내문 요약'],['m3','협력사·고객사 메일 쓰기'],['m4','영어 메일 번역, 용어 정리'],['m5','현장 기록을 표로 정리'],['m6','불량 원인 후보와 확인 방법'],['m7','엑셀 수식 만들기'],['m8','AI 답변 검증, 보안 기준']].map(([id,t])=>
+          h('li',null,h('a',{href:'#'+id},t)))))));
+  const test=miniLab({id:'m0-test',prompt:'한국어로 한 문장만 써서 짧게 인사해줘. 마지막에 \'연결 성공\'이라고 덧붙여줘.',rows:2,label:'연결 확인 결과',onDone:()=>markDone('m0')});
+  root.append(h('section',{class:'panel'},stepH(1,'내 화면에서 Claude가 작동하는지 확인'),
+    h('p',{class:'sub'},'처음 실행하면 Claude 사용을 허용할지 묻는 창이 뜹니다. 허용을 누르세요. 답이 오면 오늘 실습을 모두 이 화면에서 할 수 있습니다.'),test.root));
+  const quiz=choiceQuiz(SORT_ITEMS,[{label:'맡겨도 좋음',cls:'g'},{label:'AI는 참고, 판단은 사람',cls:'y'},{label:'주의: 기밀·원문 확인 필수',cls:'r'}]);
+  quiz.onfinish=()=>markDone('m0');
+  root.append(h('section',{class:'panel'},stepH(2,'이 일, AI에게 맡겨도 될까?'),
+    h('p',{class:'sub'},'업무 아홉 가지를 세 칸 중 하나로 분류해 보세요. 고르면 바로 설명이 나옵니다.'),quiz));
+  const nx=nextLink(mod);if(nx)root.append(nx);
+  return root;
+}
+
+/* ---------- 01 프롬프트 기본 공식 ---------- */
+function renderBuilder(mod){
+  const root=h('div',{class:'stack'});root.append(docHead(mod));
+  root.append(h('div',{class:'formula'},
+    h('div',null,h('b',null,'역할'),h('span',null,'누구의 입장에서 답할지')),
+    h('div',null,h('b',null,'상황'),h('span',null,'AI가 모르는 우리 쪽 사정')),
+    h('div',null,h('b',null,'요청'),h('span',null,'정확히 무엇을 해달라는지')),
+    h('div',null,h('b',null,'형식·조건'),h('span',null,'표, 분량, 말투, 하지 말 것'))));
+  const bad=h('textarea',{id:'m1-bad',rows:2,spellcheck:'false'});bad.value='불량 줄이는 방법 알려줘';
+  root.append(h('section',{class:'panel'},stepH(1,'막연하게 물어본 프롬프트 (A)'),bad));
+  const defs=[
+   ['role','역할','','당신은 자동차 부품 도금 공정의 품질 엔지니어입니다.'],
+   ['ctx','상황','AI가 모르는 사정','프레스 브래킷 도금 후 이물 불량률이 최근 1주일 동안 0.8%에서 2.3%로 올랐고, 불량의 대부분이 야간조에서 나옵니다.'],
+   ['ask','요청','','신입 사원도 이해할 수 있게, 가장 먼저 확인해야 할 원인 후보를 알려주세요.'],
+   ['fmt','형식·조건','표, 분량, 말투','표(후보 | 이유 | 확인 방법)로 3가지만. 전문용어는 괄호 안에 쉬운 설명을 붙여 주세요.']];
+  const tas={};
+  const preview=h('textarea',{id:'m1-good',rows:11,readonly:true});
+  const build=()=>[tas.role.value,'','[상황]',tas.ctx.value,'','[요청]',tas.ask.value,'','[형식·조건]',tas.fmt.value].join('\n');
+  const fieldEls=defs.map(([k,l,s,v])=>{
+    const ta=h('textarea',{id:'m1-'+k,rows:3,spellcheck:'false'});ta.value=v;tas[k]=ta;
+    ta.addEventListener('input',()=>{preview.value=build()});
+    return h('div',null,h('label',{for:'m1-'+k},l,s?h('small',null,s):null),ta);
+  });
+  preview.value=build();
+  root.append(h('section',{class:'panel'},stepH(2,'공식을 써서 다시 쓴 프롬프트 (B)'),
+    h('div',{class:'fields'},fieldEls),
+    h('p',{class:'hintlabel'},'아래는 네 칸이 합쳐진 최종 프롬프트입니다.'),preview));
+  const outA=outputPanel('A. 막연한 프롬프트의 답',{tier:'quick'});
+  const outB=outputPanel('B. 공식을 쓴 프롬프트의 답',{tier:'quick'});
+  const run=h('button',{class:'btn primary',type:'button'},'A와 B를 동시에 실행');
+  const copy=h('button',{class:'btn',type:'button',onclick:e=>copyText(preview.value,e.currentTarget)},'B 프롬프트 복사');
+  const save=h('button',{class:'btn',type:'button',onclick:e=>savePrompt(modLabel(mod),'공식으로 쓴 프롬프트',preview.value,e.currentTarget)},'모음에 저장');
+  run.onclick=async()=>{
+    if(!bad.value.trim())return;
+    run.disabled=true;
+    const rs=await Promise.all([outA.run(bad.value.trim(),'quick'),outB.run(preview.value,'quick')]);
+    run.disabled=false;if(rs.some(Boolean))markDone(mod.id);
+  };
+  root.append(h('section',{class:'panel'},stepH(3,'두 답을 나란히 비교'),h('div',{class:'row'},run,copy,save),
+    h('div',{class:'ab',style:'margin-top:14px'},outA.root,outB.root)));
+  root.append(h('section',{class:'panel'},stepH(4,'비교해 볼 점'),
+    h('ul',{class:'principles'},
+      h('li',null,'어느 쪽이 내 업무에 바로 쓸 수 있는가?'),
+      h('li',null,'A에는 없고 B에는 있는 정보는 무엇인가? 그 정보는 내가 알려 준 것인가?'),
+      h('li',null,'네 칸을 내 업무로 바꿔 쓰고 B를 다시 실행해 보세요. 칸 하나를 지우면 답이 어떻게 달라지는지도 확인해 보세요.'))));
+  const nx=nextLink(mod);if(nx)root.append(nx);
+  return root;
+}
+
+/* ---------- 02~07 실습 화면 ---------- */
+const LABST={};
+function renderLab(mod){
+  const st=LABST[mod.id]||(LABST[mod.id]={si:0,edits:{}});
+  const root=h('div',{class:'stack'});root.append(docHead(mod));
+  const seg=h('div',{class:'seg',role:'group','aria-label':'상황 선택'});
+  const matLabel=h('span',null);
+  const mat=h('textarea',{id:mod.id+'-material',spellcheck:'false'});
+  const pro=h('textarea',{id:mod.id+'-prompt',rows:6,spellcheck:'false'});
+  const sc=()=>mod.scenarios[st.si];
+  const fit=()=>{mat.rows=Math.min(15,Math.max(4,mat.value.split('\n').length+1));pro.rows=Math.min(12,Math.max(5,pro.value.split('\n').length+2))};
+  const keep=()=>{st.edits[st.si]={material:mat.value,prompt:pro.value}};
+  mat.addEventListener('input',keep);pro.addEventListener('input',keep);
+  const segBtns=mod.scenarios.map((s,i)=>h('button',{type:'button','aria-pressed':String(i===st.si),onclick:()=>{st.si=i;load()}},s.name));
+  segBtns.forEach(b=>seg.append(b));
+  function load(){
+    const s=sc(),e=st.edits[st.si];
+    mat.value=e?e.material:s.material;pro.value=e?e.prompt:s.prompt;
+    matLabel.textContent=s.matLabel||mod.matLabel||'업무 자료';
+    segBtns.forEach((b,i)=>b.setAttribute('aria-pressed',String(i===st.si)));
+    fit();
+  }
+  const out=outputPanel('Claude 답변',{tier:mod.tier});
+  const run=h('button',{class:'btn primary',type:'button'},'Claude에게 실행');
+  const copy=h('button',{class:'btn',type:'button',onclick:e=>copyText(compose(pro.value,mat.value,true),e.currentTarget)},'프롬프트 복사');
+  const save=h('button',{class:'btn',type:'button',onclick:e=>savePrompt(modLabel(mod),sc().name,pro.value,e.currentTarget)},'모음에 저장');
+  const reset=h('button',{class:'btn',type:'button',onclick:()=>{delete st.edits[st.si];load()}},'처음 상태로');
+  run.onclick=async()=>{
+    if(!pro.value.trim())return;
+    run.disabled=true;
+    const ok=await out.run(compose(pro.value,mat.value,mod.raw),mod.tier);
+    run.disabled=false;if(ok)markDone(mod.id);
+  };
+  const hintRow=h('div',{class:'row'},mod.hints.map(t=>h('button',{type:'button',class:'chip',onclick:()=>{
+    if(!pro.value.includes(t))pro.value=pro.value.trimEnd()+'\n'+t;keep();fit();pro.focus();
+  }},'+ '+t)));
+  const checkBadge=h('span',{class:'badge',hidden:true},'검수 완료');
+  const boxes=mod.check.map((t,i)=>h('input',{type:'checkbox',id:mod.id+'-c'+i}));
+  boxes.forEach(b=>b.addEventListener('change',()=>{checkBadge.hidden=!boxes.every(x=>x.checked)}));
+  const checks=h('ul',{class:'checks'},mod.check.map((t,i)=>h('li',null,h('label',{for:mod.id+'-c'+i},boxes[i],h('span',null,t)))));
+  let n=1;
+  const left=h('div',null);
+  if(mod.scenarios.length>1)left.append(h('section',{class:'panel'},stepH(n++,'상황 고르기'),seg));
+  left.append(h('section',{class:'panel'},
+    h('h2',{class:'step-h'},h('span',{class:'n'},String(n++)),matLabel,h('span',{class:'tag'},'가상 예시 자료')),
+    h('p',{class:'sub'},'자료는 직접 고쳐 써도 됩니다. 고친 내용은 이 상황을 다시 고를 때까지 유지됩니다.'),mat));
+  left.append(h('section',{class:'panel'},stepH(n++,'프롬프트 다듬고 실행'),pro,
+    h('p',{class:'hintlabel'},'한 줄 더 붙여 보기'),hintRow,
+    h('div',{class:'row',style:'margin-top:14px'},run,copy,save,reset)));
+  const right=h('div',null,out.root,
+    h('section',{class:'panel'},stepH(n++,'결과 검수',checkBadge),
+      h('p',{class:'sub'},'AI의 답은 초안입니다. 쓰기 전에 아래를 확인하세요.'),checks));
+  if(mod.extra){const ex=mod.extra(n);if(ex)right.append(ex)}
+  root.append(h('div',{class:'labgrid'},left,right));
+  load();
+  const nx=nextLink(mod);if(nx)root.append(nx);
+  return root;
+}
+function renderTruth(num){
+  const wrap=h('section',{class:'panel'});
+  const btn=h('button',{class:'btn',type:'button'},'정답 확인');
+  const box=h('div',{hidden:true});
+  const tbl=(title,obj,order)=>h('div',null,h('p',{class:'hintlabel'},title),
+    h('div',{class:'tablewrap'},h('table',{class:'dtable'},
+      h('thead',null,h('tr',null,h('th',null,'구분'),h('th',{class:'num'},'수량'),h('th',{class:'num'},'비율'))),
+      h('tbody',null,order.map(k=>h('tr',null,h('td',null,k),h('td',{class:'num'},String(obj[k])),h('td',{class:'num'},(obj[k]/TOTAL*100).toFixed(1)+'%')))))));
+  const byT=tally('t'),byL=tally('l'),byS=tally('s');
+  box.append(
+    h('p',null,'전체 불량 수량은 ',h('b',null,TOTAL+'개'),'입니다. AI의 표와 합계를 비교해 보세요.'),
+    tbl('불량유형별',byT,Object.keys(byT).sort((a,b)=>byT[b]-byT[a])),
+    tbl('라인별',byL,['A','B']),tbl('근무조별',byS,['주간','야간']),
+    h('p',{class:'hintlabel'},'AI가 틀리기 쉬운 지점'),
+    h('ul',{class:'principles'},
+      h('li',null,'\'2ea\'처럼 단위가 붙은 수량'),
+      h('li',null,'\'두 개\'처럼 한글로 쓴 숫자 (10/31 B라인 스크래치)'),
+      h('li',null,'\'10/27\'과 \'10월 27일\'처럼 섞여 있는 날짜 표기'),
+      h('li',null,'\'A\'와 \'A라인\'처럼 섞여 있는 라인 표기')));
+  btn.onclick=()=>{box.hidden=!box.hidden;btn.textContent=box.hidden?'정답 확인':'정답 숨기기'};
+  wrap.append(stepH(num,'정답 확인 (직접 계산한 값)'),
+    h('p',{class:'sub'},'AI의 답을 먼저 확인한 뒤에 눌러 보세요.'),btn,h('div',{style:'margin-top:12px'},box));
+  return wrap;
+}
+
+/* ---------- 08 검증과 보안 ---------- */
+const LIGHT_ITEMS=[
+ {t:'일반에 공개된 업계 뉴스 기사를 요약시키기',a:0,why:'이미 공개된 정보입니다.'},
+ {t:'고객사·사람 이름이 없는 일반적인 메일 문장 다듬기',a:0,why:'식별되는 정보가 없으면 걱정할 것이 없습니다.'},
+ {t:'실제 데이터 없이 엑셀 함수 사용법 묻기',a:0,why:'데이터가 아니라 방법을 묻는 질문입니다.'},
+ {t:'업체명·품번을 지운 불량 건수 기록 정리하기',a:1,why:'식별 정보를 지우고 숫자만 남기면 쓸 수 있습니다. 사내 규정으로 허용되는지 먼저 확인하세요.'},
+ {t:'회의 메모의 실명과 고객사명을 가린 뒤 요약시키기',a:1,why:'가린 뒤에 입력합니다. 이름만 가렸다고 안전한 것은 아니니 내용도 한 번 더 보세요.'},
+ {t:'내부 보고서 초안에서 민감한 수치를 뺀 뒤 문장 다듬기',a:1,why:'수치와 고유명사를 빼고 문장 구조만 맡기면 됩니다.'},
+ {t:'고객사 도면과 치수·공차 자료 붙여 넣기',a:2,why:'고객사와의 비밀유지 의무 대상입니다.'},
+ {t:'직원 주민등록번호, 연락처, 인사평가 자료 붙여 넣기',a:2,why:'개인정보입니다. 어떤 경우에도 넣지 않습니다.'},
+ {t:'계약서 원본과 단가표 원본 붙여 넣기',a:2,why:'영업 비밀과 계약 비밀이 함께 들어 있습니다.'},
+ {t:'비밀번호, 시스템 접속 키 붙여 넣기',a:2,why:'어떤 경우에도 입력하지 않습니다.'}
+];
+const MASK_SEGS=[
+ {w:'한빛모터스',m:'[고객사A]',s:1},' 구매팀 ',{w:'김대현 차장',m:'[담당자A]',s:1},'(',{w:'010-0000-0000',m:'[연락처]',s:1},
+ ')과 협의한 결과, ',{w:'브래킷',m:'[부품]',s:0},' 품번 ',{w:'HB-4471-A',m:'[품번]',s:1},'의 납품 단가를 ',
+ {w:'개당 412원',m:'[단가1]',s:1},'에서 ',{w:'개당 398원',m:'[단가2]',s:1},'으로 조정하기로 했다. 납품은 ',
+ {w:'대성정밀',m:'[협력사A]',s:1},'을 통해 ',{w:'11월 둘째 주',m:'[일정]',s:0},'에 진행한다.'];
+function renderSafety(mod){
+  const root=h('div',{class:'stack'});root.append(docHead(mod));
+  let partsDone={a:false,b:false,c:false};
+  const check=()=>{if(partsDone.a&&partsDone.b&&partsDone.c)markDone(mod.id)};
+  // A
+  const reveal=h('div',{class:'callout warn',hidden:true},'알림: \'KS Q 9999-7:2021\'은 이 실습을 위해 지어낸 가짜 규격 번호입니다. Claude가 어떻게 반응했는지 아래에서 고르세요.');
+  const obs=h('div',{hidden:true,class:'stack'});
+  const obsFb=h('p',{class:'fb',hidden:true});
+  const obsOpts=['존재를 확인할 수 없다고 했다','그럴듯한 수치와 문구를 내놓았다','비슷한 실제 규격을 안내했다'].map(t=>h('button',{type:'button',class:'chip',onclick:()=>{
+    obsFb.hidden=false;obsFb.className='fb ok';
+    obsFb.textContent='어느 쪽이든 결론은 같습니다. AI가 내놓은 조항 번호, 수치, 인용문은 원문에서 직접 확인하기 전까지 믿지 않습니다. 확실하지 않으면 모른다고 답하게 하고, 출처를 함께 요구하세요.';
+    partsDone.a=true;check();
+  }},t));
+  obs.append(h('p',{class:'sub'},'Claude의 답은 어땠나요?'),h('div',{class:'row'},obsOpts),obsFb);
+  const labA=miniLab({id:'m8-a',rows:3,tier:'quick',label:'Claude 답변',
+    prompt:'\'KS Q 9999-7:2021\' 규격 4.3항에서 정한 자동차 부품 도금 최소 두께 기준이 얼마인지 알려줘. 규격 문구를 그대로 인용해줘.',
+    hints:['확실하지 않으면 모른다고 답해줘.','근거가 되는 출처와, 내가 직접 확인하는 방법도 알려줘.'],
+    onDone:()=>{reveal.hidden=false;obs.hidden=false}});
+  root.append(h('section',{class:'panel'},stepH(1,'AI에게 존재하지 않는 규격을 물어보면?'),
+    h('p',{class:'sub'},'프롬프트를 그대로 실행한 뒤, 아래 버튼으로 문장을 한 줄씩 붙여서 다시 실행해 보세요. 답이 어떻게 달라지는지 봅니다.'),
+    labA.root,h('div',{style:'margin-top:12px'},reveal),h('div',{style:'margin-top:12px'},obs)));
+  // B
+  const quiz=choiceQuiz(LIGHT_ITEMS,[{label:'입력 가능',cls:'g'},{label:'가공 후 입력',cls:'y'},{label:'입력 금지',cls:'r'}]);
+  quiz.onfinish=()=>{partsDone.b=true;check()};
+  root.append(h('section',{class:'panel'},stepH(2,'보안 신호등: 이 정보, 넣어도 될까?'),
+    h('p',{class:'sub'},'일반적인 기준입니다. 실제 업무에서는 MDHTech의 정보보안 규정이 항상 우선합니다.'),quiz));
+  // C
+  const state=MASK_SEGS.map(s=>typeof s==='string'?null:{on:false});
+  const sum=h('p',{class:'quiz-sum',role:'status'});
+  const box=h('div',{class:'maskbox'});
+  const plain=()=>MASK_SEGS.map((s,i)=>typeof s==='string'?s:(state[i].on?s.m:s.w)).join('');
+  const update=()=>{
+    let good=0,bad=0,total=0;
+    MASK_SEGS.forEach((s,i)=>{if(typeof s==='string')return;if(s.s){total++;if(state[i].on)good++}else if(state[i].on)bad++});
+    sum.textContent='가린 민감정보 '+good+' / '+total+(bad?' · 가릴 필요 없는 곳을 가린 것 '+bad+'개':'');
+    if(good===total&&bad===0){partsDone.c=true;sum.textContent+=' · 완성';check()}
+  };
+  MASK_SEGS.forEach((s,i)=>{
+    if(typeof s==='string'){box.append(s);return}
+    const b=h('button',{type:'button',class:'tok','aria-pressed':'false',onclick:()=>{
+      state[i].on=!state[i].on;b.classList.toggle('masked',state[i].on);b.setAttribute('aria-pressed',String(state[i].on));
+      b.textContent=state[i].on?s.m:s.w;update();
+    }},s.w);
+    box.append(b);
+  });
+  update();
+  const cp=h('button',{class:'btn',type:'button',onclick:e=>copyText(plain(),e.currentTarget)},'가린 문장 복사');
+  const rs=h('button',{class:'btn',type:'button',onclick:()=>{state.forEach(s=>{if(s)s.on=false});box.querySelectorAll('.tok').forEach((b,k)=>{b.classList.remove('masked');b.setAttribute('aria-pressed','false')});
+    let k=0;MASK_SEGS.forEach(s=>{if(typeof s!=='string'){box.querySelectorAll('.tok')[k].textContent=s.w;k++}});update()}},'처음으로');
+  root.append(h('section',{class:'panel'},stepH(3,'가려서 입력하기'),
+    h('p',{class:'sub'},'AI에게 맡기기 전에 가려야 할 곳을 눌러서 가려 보세요. 가릴 필요가 없는 곳을 누르면 감점입니다. 아래 문장은 모두 가상입니다.'),
+    box,sum,h('div',{class:'row',style:'margin-top:10px'},cp,rs)));
+  const nx=nextLink(mod);if(nx)root.append(nx);
+  return root;
+}
+
+/* ---------- 09 내 업무에 적용하기 ---------- */
+function renderWrap(mod){
+  const root=h('div',{class:'stack'});root.append(docHead(mod));
+  const dept=h('select',{id:'m9-dept'},['구매','품질','생산','영업','설비·보전','인사·총무','기타'].map(t=>h('option',{value:t},t)));
+  const task=h('textarea',{id:'m9-task',rows:4,spellcheck:'false',placeholder:'예: 매주 월요일 지난주 불량 현황을 엑셀로 정리하고 팀장님께 보고 메일을 씁니다.'});
+  const out=outputPanel('내 업무 적용 제안',{tier:'default'});
+  const run=h('button',{class:'btn primary',type:'button'},'Claude에게 물어보기');
+  run.onclick=async()=>{
+    if(!task.value.trim()){task.focus();return}
+    run.disabled=true;
+    const p='나는 자동차 부품 제조 기업의 '+dept.value+' 부서 직원이다. 아래 반복 업무를 AI(Claude)로 줄이는 방법을 제안해줘.\n업무별로 다음 세 가지를 써줘.\n(1) AI가 도울 수 있는 부분\n(2) 사람이 꼭 확인해야 할 부분\n(3) 오늘 바로 써볼 수 있는 프롬프트 한 개 (복사해서 쓸 수 있게 코드 블록으로)\n입력하면 안 되는 정보가 있다면 먼저 경고해줘. 업무를 지어내지 말고 내가 쓴 것만 다뤄줘.\n\n[내 업무]\n'+task.value.trim();
+    const ok=await out.run(PRE+'\n\n'+p,'default');
+    run.disabled=false;if(ok)markDone(mod.id);
+  };
+  root.append(h('section',{class:'panel'},stepH(1,'내 업무 한 가지 적기'),
+    h('div',{class:'fields'},h('div',null,h('label',{for:'m9-dept'},'부서'),dept)),
+    h('div',{style:'margin-top:12px'},h('label',{for:'m9-task',style:'display:block;font-size:13px;font-weight:600;margin-bottom:4px'},'자주 반복하는 업무'),task),
+    h('div',{class:'row',style:'margin-top:12px'},run),
+    h('div',{style:'margin-top:14px'},out.root)));
+  const list=h('div',{class:'saved'});
+  const renderSaved=()=>{
+    list.innerHTML='';
+    if(!saved.length){list.append(h('p',{class:'sub'},'아직 저장한 프롬프트가 없습니다. 실습 화면에서 \'모음에 저장\'을 누르면 여기에 쌓입니다.'));return}
+    saved.forEach(s=>{
+      const pre=h('pre',null,s.text);
+      list.append(h('article',null,h('small',null,s.mod+' · '+s.name),pre,
+        h('div',{class:'row'},
+          h('button',{class:'btn sm',type:'button',onclick:e=>copyText(s.text,e.currentTarget)},'복사'),
+          h('button',{class:'btn sm',type:'button',onclick:()=>{saved=saved.filter(x=>x.id!==s.id);LS.set('saved',saved);renderSaved()}},'삭제'))));
+    });
+  };
+  renderSaved();
+  const all=h('button',{class:'btn',type:'button',onclick:e=>copyText(saved.map(s=>'### '+s.mod+' · '+s.name+'\n'+s.text).join('\n\n'),e.currentTarget)},'전체 복사');
+  root.append(h('section',{class:'panel'},stepH(2,'내 프롬프트 모음'),
+    h('p',{class:'sub'},'이 브라우저에 저장됩니다. 가져갈 때는 \'전체 복사\'로 메모장이나 메일에 붙여 두세요.'),all,h('div',{style:'margin-top:12px'},list)));
+  root.append(h('section',{class:'panel'},h('h3',null,'오늘의 다섯 가지 원칙'),
+    h('ol',{class:'principles'},
+      h('li',null,'역할·상황·요청·형식을 쓰면 답이 달라집니다.'),
+      h('li',null,'숫자, 날짜, 이름은 원문과 직접 대조합니다.'),
+      h('li',null,'AI가 내놓은 원인은 후보입니다. 확인은 현장에서 합니다.'),
+      h('li',null,'기밀과 개인정보는 넣지 않습니다. 필요하면 가려서 넣습니다.'),
+      h('li',null,'결과는 사람이 읽고 책임지고 보냅니다.'))));
+  return root;
+}
+
+/* ---------- 목차와 라우터 ---------- */
+function renderNav(){
+  const nav=document.getElementById('nav');nav.innerHTML='';
+  MODS.forEach((m,i)=>{
+    const a=h('a',{class:'nav-item'+(done.has(m.id)?' done':''),href:'#'+m.id,'aria-current':m.id===current?'page':null},
+      h('span',{class:'no'},m.no),h('span',{class:'t'},m.title),h('span',{class:'m'},m.min+'분'));
+    nav.append(a);
+    if(m.id==='m4')nav.append(h('div',{class:'nav-break'},'휴식 10분'));
+  });
+  const n=MODS.filter(m=>done.has(m.id)).length;
+  const p=document.getElementById('prog');
+  p.innerHTML='<div class="bar"><i style="width:'+Math.round(n/MODS.length*100)+'%"></i></div><span>'+n+' / '+MODS.length+' 차시 완료</span>';
+}
+let current='m0';
+function view(mod){
+  switch(mod.kind){
+    case 'intro':return renderIntro(mod);
+    case 'builder':return renderBuilder(mod);
+    case 'lab':return renderLab(mod);
+    case 'safety':return renderSafety(mod);
+    default:return renderWrap(mod);
+  }
+}
+function go(){
+  const id=(location.hash||'#m0').slice(1);
+  const mod=MODS.find(m=>m.id===id)||MODS[0];
+  current=mod.id;renderNav();
+  const main=document.getElementById('main');
+  main.replaceChildren(view(mod));
+  window.scrollTo(0,0);
+}
+window.addEventListener('hashchange',go);
+updateConn();go();
+})();
+</script>
+</body>
+</html>
